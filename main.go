@@ -49,7 +49,7 @@ func mp4play(w http.ResponseWriter, r *http.Request){
 
 func main() {
 	http.HandleFunc("/mp4", mp4play)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/public", func(w http.ResponseWriter, r *http.Request) {
 		Path := r.URL.Path
 		path := fmt.Sprintf("%s", Path)
 		fmt.Println(Path)
