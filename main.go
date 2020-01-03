@@ -49,11 +49,11 @@ func mp4play(w http.ResponseWriter, r *http.Request){
 
 func main() {
 	http.HandleFunc("/mp4", mp4play)
-	http.HandleFunc("/public", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		Path := r.URL.Path
 		path := fmt.Sprintf("%s", Path)
 		fmt.Println(Path)
-		http.ServeFile(w, r, "./"+path)
+		http.ServeFile(w, r, "./public/"+path)
 
 	}) //设置访问的路由
 	fmt.Println("start")
