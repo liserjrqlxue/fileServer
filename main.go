@@ -34,7 +34,7 @@ func main() {
 		urlPath := fmt.Sprintf("%s", Path)
 		fmt.Println(Path)
 		if strings.HasPrefix(r.URL.Path, "/public") {
-			http.ServeFile(w, r, urlPath)
+			http.ServeFile(w, r, "./"+urlPath)
 		} else {
 			http.ServeFile(w, r, "./public/"+urlPath)
 		}

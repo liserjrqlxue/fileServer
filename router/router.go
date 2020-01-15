@@ -88,12 +88,14 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		simpleUtil.CheckErr(err)
 		defer simpleUtil.DeferClose(file)
 		//Info.Message=fmt.Sprint(handler.Header)
-		f, err := os.Create(path.Join("public", "upload", handler.Filename))
+		uploadFile := path.Join("public", "upload", handler.Filename)
+		f, err := os.Create(uploadFile)
 		simpleUtil.CheckErr(err)
 		defer simpleUtil.DeferClose(f)
 		_, err = io.Copy(f, file)
 		simpleUtil.CheckErr(err)
 		src.Message = "upload succeed"
+		src.Src = uploadFile
 	}
 	simpleUtil.CheckErr(t.Execute(w, src))
 }
