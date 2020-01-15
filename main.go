@@ -1,64 +1,46 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"html/template"
-	"log"
 	"net/http"
-	"strconv"
+	"os"
+	"path"
 	"strings"
-	"crypto/md5"
-	"time"
+
+	simpleUtil "github.com/liserjrqlxue/simple-util"
+
+	"github.com/liserjrqlxue/fileServer/router"
 )
 
-func md5sum(str string) string {
-	byteStr := []byte(str)
-	sum := md5.Sum(byteStr)
-	sumStr := fmt.Sprintf("%x", sum)
-	return sumStr
-}
-
-type MP4 struct{
-    Src string
-    Token string
-}
-
-func mp4play(w http.ResponseWriter, r *http.Request){
-    r.ParseForm()
-    fmt.Println("r.Form:\t",r.Form)
-    fmt.Println("path:\t",r.URL.Scheme)
-    fmt.Println("url_long:\t",r.Form["url_long"])
-    for k,v:=range r.Form{
-	fmt.Println("\tkey:\t",k)
-	fmt.Println("\tval:\t",strings.Join(v," "))
-    }
-
-    // token
-    crutime:=time.Now().Unix()
-    token:=md5sum(strconv.FormatInt(crutime,10))
-    fmt.Println("token:\t",token)
-    t,_:=template.ParseFiles("template/mp4play.gtpl")
-    var src MP4
-    //{Src:r.Form["file"][0],Token:token}
-    src.Token=token
-    if len(r.Form["file"])>0{
-	src.Src=r.Form["file"][0]
-    }
-    t.Execute(w,src)
-}
+var (
+	port = flag.String(
+		"port",
+		":9091",
+		"web server listen port",
+	)
+)
 
 func main() {
-	http.HandleFunc("/mp4", mp4play)
+	flag.Parse()
+	err := os.MkdirAll("public", 0755)
+	simpleUtil.CheckErr(err)
+	err = os.MkdirAll(path.Join("public", "upload"), 0755)
+	simpleUtil.CheckErr(err)
+	http.HandleFunc("/mp4", router.Mp4play)
+	http.HandleFunc("/upload", router.Upload)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		Path := r.URL.Path
-		path := fmt.Sprintf("%s", Path)
+		urlPath := fmt.Sprintf("%s", Path)
 		fmt.Println(Path)
-		http.ServeFile(w, r, "./public/"+path)
+		if strings.HasPrefix(r.URL.Path, "/public") {
+			http.ServeFile(w, r, urlPath)
+		} else {
+			http.ServeFile(w, r, "./public/"+urlPath)
+		}
 
 	}) //设置访问的路由
 	fmt.Println("start")
-	err := http.ListenAndServe(":9093", nil) //设置监听的端口
-	if err != nil {
-		log.Fatal(err)
-	}
+	err = http.ListenAndServe(*port, nil) //设置监听的端口
+	simpleUtil.CheckErr(err)
 }

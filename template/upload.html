@@ -1,0 +1,24 @@
+<html>
+<head>
+	<title>File Upload</title>
+</head>
+<body>
+<main>
+	<div>
+		<h1>上传文件到<a href="/public/upload" target="_blank">public/upload</a></h1>
+	</div>
+	<div class="">
+		<form enctype="multipart/form-data" action="/upload" method="post">
+			<input type="hidden" name="token" value="{{.Token}}"/>
+			<input type="file" id="i-file" name="uploadfile" required="required" />
+			<button type="submit">upload</button>
+		</form>
+	</div>
+	<script>
+		if({{.Message}}!=""){
+		    console.log({{.Message}})
+			alert({{.Message}})
+		}
+	</script>
+</main>
+</body>
