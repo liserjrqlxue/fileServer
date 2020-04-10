@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	simpleUtil "github.com/liserjrqlxue/simple-util"
+	"github.com/liserjrqlxue/goUtil/simpleUtil"
 )
 
 func md5sum(str string) string {
