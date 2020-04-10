@@ -3,7 +3,7 @@ github.com/google/go-cmp v0.3.1/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMyw
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/liserjrqlxue/goUtil v0.0.8 h1:jZY+nnV/rBkUK0xMHKghkrhI99NC5eodtJ5snwrUEn8=
-github.com/liserjrqlxue/goUtil v0.0.8/go.mod h1:I+ZuTdYWyUfElQfcB8VfnBdr4EN1Z23NxP6Rm62Qetw=
+github.com/liserjrqlxue/goUtil v0.0.10 h1:A6tiPDS7EJYZm9rc98Jv/EBC1ulzE/1tq1Af0orX1QI=
+github.com/liserjrqlxue/goUtil v0.0.10/go.mod h1:I+ZuTdYWyUfElQfcB8VfnBdr4EN1Z23NxP6Rm62Qetw=
 github.com/tealeg/xlsx/v2 v2.0.1/go.mod h1:l9GvhCCjdaIGkAyZcFedDALcYcXUOei55f6umRMOz9c=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

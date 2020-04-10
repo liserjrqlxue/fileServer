@@ -1,7 +1,6 @@
 package router
 
 import (
-	"crypto/md5"
 	"fmt"
 	"html/template"
 	"io"
@@ -13,15 +12,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/liserjrqlxue/goUtil/cryptoUtil"
 	"github.com/liserjrqlxue/goUtil/simpleUtil"
 )
-
-func md5sum(str string) string {
-	byteStr := []byte(str)
-	sum := md5.Sum(byteStr)
-	sumStr := fmt.Sprintf("%x", sum)
-	return sumStr
-}
 
 type Info struct {
 	Src     string
@@ -44,7 +37,7 @@ func Mp4play(w http.ResponseWriter, r *http.Request) {
 
 	// token
 	crutime := time.Now().Unix()
-	token := md5sum(strconv.FormatInt(crutime, 10))
+	token := cryptoUtil.Md5sum(strconv.FormatInt(crutime, 10))
 	fmt.Println("token:\t", token)
 	t, err := template.ParseFiles("template/mp4play.html")
 	if err != nil {
@@ -71,7 +64,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// token
 	crutime := time.Now().Unix()
-	token := md5sum(strconv.FormatInt(crutime, 10))
+	token := cryptoUtil.Md5sum(strconv.FormatInt(crutime, 10))
 	fmt.Println("token:\t", token)
 	var src Info
 	src.Token = token
@@ -84,13 +77,21 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			log.Print(err)
 			return
 		}
-		file, handler, err := r.FormFile("uploadfile")
+		var dest string
+		if len(r.Form["dest"]) > 0 {
+			dest = r.Form["dest"][0]
+			if dest == "" {
+				dest = "."
+			}
+			simpleUtil.CheckErr(os.MkdirAll(dest, 0755))
+		}
+		var file, handler, err = r.FormFile("uploadfile")
 		simpleUtil.CheckErr(err)
 		defer simpleUtil.DeferClose(file)
 		//Info.Message=fmt.Sprint(handler.Header)
-		uploadFile := path.Join("public", "upload", handler.Filename)
+		var uploadFile = path.Join(dest, handler.Filename)
+		simpleUtil.CheckErr(err, "create error")
 		f, err := os.Create(uploadFile)
-		simpleUtil.CheckErr(err)
 		defer simpleUtil.DeferClose(f)
 		_, err = io.Copy(f, file)
 		simpleUtil.CheckErr(err)
