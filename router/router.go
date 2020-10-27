@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -21,6 +22,8 @@ type Info struct {
 	Token   string
 	Message string
 }
+
+var Public = "."
 
 func Mp4play(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
@@ -99,4 +102,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		src.Src = uploadFile
 	}
 	simpleUtil.CheckErr(t.Execute(w, src))
+}
+
+func Download(w http.ResponseWriter, r *http.Request) {
+	var relPath = filepath.Join(Public, r.URL.Path)
+	log.Printf("[%s]\t->\t[%s]\n", r.URL.Path, relPath)
+	http.ServeFile(w, r, relPath)
 }

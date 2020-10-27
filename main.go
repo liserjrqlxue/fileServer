@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -35,13 +35,12 @@ func main() {
 		}
 		print(*public)
 	}
+	router.Public = *public
+
 	http.HandleFunc("/mp4", router.Mp4play)
 	http.HandleFunc("/upload", router.Upload)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		var path = *public + r.URL.Path
-		fmt.Printf("[%s] -> [%s]\n", r.URL.Path, path)
-		http.ServeFile(w, r, path)
-	}) //设置访问的路由
-	fmt.Println("start", "http://localhost"+*port)
+	http.HandleFunc("/", router.Download)
+
+	log.Println("Start", "http://localhost"+*port)
 	simpleUtil.CheckErr(http.ListenAndServe(*port, nil)) //设置监听的端口
 }
