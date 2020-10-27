@@ -5,10 +5,18 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/liserjrqlxue/goUtil/simpleUtil"
 
 	"github.com/liserjrqlxue/fileServer/router"
+)
+
+var (
+	cwd, _       = os.Getwd()
+	ex, _        = os.Executable()
+	exPath       = filepath.Dir(ex)
+	templatePath = filepath.Join(exPath, "template")
 )
 
 var (
@@ -27,16 +35,15 @@ var (
 var err error
 
 func main() {
+	simpleUtil.CheckErr(err)
+
 	flag.Parse()
 	if *public == "" {
-		*public, err = os.Getwd()
-		if err != nil {
-			panic(err)
-		}
-		print(*public)
+		*public = cwd
 	}
-	router.Public = *public
 
+	router.PublicPath = *public
+	router.TemplatePath = templatePath
 	http.HandleFunc("/mp4", router.Mp4play)
 	http.HandleFunc("/upload", router.Upload)
 	http.HandleFunc("/", router.Download)

@@ -23,12 +23,22 @@ type Info struct {
 	Message string
 }
 
-var Public = "."
+var (
+	PublicPath   = "public"
+	UploadPath   = "upload"
+	TemplatePath = "template"
+)
 
 func Mp4play(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	var (
+		t   *template.Template
+		src Info
+		err error
+	)
+	err = r.ParseForm()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+		return
 	}
 	fmt.Println("r.Form:\t", r.Form)
 	fmt.Println("path:\t", r.URL.Scheme)
@@ -39,18 +49,20 @@ func Mp4play(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// token
-	crutime := time.Now().Unix()
+	var crutime = time.Now().Unix()
 	token := cryptoUtil.Md5sum(strconv.FormatInt(crutime, 10))
 	fmt.Println("token:\t", token)
-	t, err := template.ParseFiles("template/mp4play.html")
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-	}
-	var src Info
+
 	//{Src:r.Form["file"][0],Token:token}
 	src.Token = token
 	if len(r.Form["file"]) > 0 {
 		src.Src = r.Form["file"][0]
+	}
+
+	t, err = template.ParseFiles(filepath.Join(TemplatePath, "mp4play.html"))
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
 	}
 	if t != nil {
 		err = t.Execute(w, src)
@@ -58,54 +70,83 @@ func Mp4play(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), 500)
 		}
 	} else {
-		http.Error(w, "template/mp4play parse failed!", 500)
+		http.Error(w, "mp4play parse failed!", 500)
 	}
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
+	var (
+		t   *template.Template
+		src Info
+		err error
+	)
 	log.Println(r.URL.Path, " method:", r.Method)
 
 	// token
-	crutime := time.Now().Unix()
-	token := cryptoUtil.Md5sum(strconv.FormatInt(crutime, 10))
-	fmt.Println("token:\t", token)
-	var src Info
+	var crutime = time.Now().Unix()
+	var token = cryptoUtil.Md5sum(strconv.FormatInt(crutime, 10))
+	log.Println("token:\t", token)
 	src.Token = token
-	t, err := template.ParseFiles("template/upload.html")
-	simpleUtil.CheckErr(err)
 
-	if r.Method == "POST" {
-		err = r.ParseMultipartForm(32 << 20)
-		if err != nil {
-			log.Print(err)
-			return
-		}
-		var dest string
-		if len(r.Form["dest"]) > 0 {
-			dest = r.Form["dest"][0]
-			if dest == "" {
-				dest = "."
-			}
-			simpleUtil.CheckErr(os.MkdirAll(dest, 0755))
-		}
-		var file, handler, err = r.FormFile("uploadfile")
-		simpleUtil.CheckErr(err)
-		defer simpleUtil.DeferClose(file)
-		//Info.Message=fmt.Sprint(handler.Header)
-		var uploadFile = path.Join(dest, handler.Filename)
-		simpleUtil.CheckErr(err, "create error")
-		f, err := os.Create(uploadFile)
-		defer simpleUtil.DeferClose(f)
-		_, err = io.Copy(f, file)
-		simpleUtil.CheckErr(err)
-		src.Message = "upload succeed"
-		src.Src = uploadFile
+	t, err = template.ParseFiles(filepath.Join(TemplatePath, "upload.html"))
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
 	}
-	simpleUtil.CheckErr(t.Execute(w, src))
+
+	if t != nil {
+		if r.Method == "POST" {
+			err = r.ParseMultipartForm(32 << 20)
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+				return
+			}
+			var dest string
+			if len(r.Form["dest"]) > 0 {
+				dest = r.Form["dest"][0]
+				if dest == "" {
+					dest = UploadPath
+				}
+				err = os.MkdirAll(dest, 0755)
+				if err != nil {
+					http.Error(w, err.Error(), 500)
+					return
+				}
+			}
+			file, handler, err := r.FormFile("uploadfile")
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+				return
+			}
+			defer simpleUtil.DeferClose(file)
+			//Info.Message=fmt.Sprint(handler.Header)
+			var uploadFile = path.Join(dest, handler.Filename)
+			simpleUtil.CheckErr(err, "create error")
+			f, err := os.Create(uploadFile)
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+				return
+			}
+			defer simpleUtil.DeferClose(f)
+			_, err = io.Copy(f, file)
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+				return
+			}
+			src.Message = "upload succeed"
+			src.Src = uploadFile
+		}
+		err = t.Execute(w, src)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+	} else {
+		http.Error(w, "upload parse failed!", 500)
+	}
 }
 
 func Download(w http.ResponseWriter, r *http.Request) {
-	var relPath = filepath.Join(Public, r.URL.Path)
+	var relPath = filepath.Join(PublicPath, r.URL.Path)
 	log.Printf("[%s]\t->\t[%s]\n", r.URL.Path, relPath)
 	http.ServeFile(w, r, relPath)
 }
