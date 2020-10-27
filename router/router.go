@@ -101,12 +101,13 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), 500)
 				return
 			}
-			var dest string
+			var dest, destUrl string
 			if len(r.Form["dest"]) > 0 {
-				dest = r.Form["dest"][0]
-				if dest == "" {
-					dest = UploadPath
+				destUrl = r.Form["dest"][0]
+				if destUrl == "" {
+					destUrl = UploadPath
 				}
+				dest = filepath.Join(PublicPath, destUrl)
 				err = os.MkdirAll(dest, 0755)
 				if err != nil {
 					http.Error(w, err.Error(), 500)
@@ -134,7 +135,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			src.Message = "upload succeed"
-			src.Src = uploadFile
+			src.Src = path.Join(destUrl, handler.Filename)
 		}
 		err = t.Execute(w, src)
 		if err != nil {
