@@ -30,6 +30,11 @@ var (
 		"",
 		"root path of public, default is current workdir",
 	)
+	noCache = flag.Bool(
+		"noCache",
+		false,
+		"set Cache-Control no-store for ServeFile",
+	)
 )
 
 var err error
@@ -44,6 +49,7 @@ func main() {
 
 	router.PublicPath = *public
 	router.TemplatePath = templatePath
+	router.ServeFileNoCache = *noCache
 	http.HandleFunc("/mp4", router.Mp4play)
 	http.HandleFunc("/upload", router.Upload)
 	http.HandleFunc("/", router.Download)

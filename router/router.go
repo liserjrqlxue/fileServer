@@ -24,9 +24,10 @@ type Info struct {
 }
 
 var (
-	PublicPath   = "public"
-	UploadPath   = "upload"
-	TemplatePath = "template"
+	PublicPath       = "public"
+	UploadPath       = "upload"
+	TemplatePath     = "template"
+	ServeFileNoCache = false
 )
 
 func Mp4play(w http.ResponseWriter, r *http.Request) {
@@ -149,5 +150,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 func Download(w http.ResponseWriter, r *http.Request) {
 	var relPath = filepath.Join(PublicPath, r.URL.Path)
 	log.Printf("[%s]\t->\t[%s]\n", r.URL.Path, relPath)
+	if ServeFileNoCache {
+		w.Header().Set("Cache-Control", "no-store")
+	}
 	http.ServeFile(w, r, relPath)
 }
